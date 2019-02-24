@@ -108,7 +108,7 @@ public class Map_view_fragment extends Fragment
 
     @Override
     public boolean onMyLocationButtonClick() {
-        Toast.makeText(getActivity(), "MyLocation button clicked", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getActivity(), "My Location button clicked", Toast.LENGTH_SHORT).show();
         return false;
-    };
+    }
 }
