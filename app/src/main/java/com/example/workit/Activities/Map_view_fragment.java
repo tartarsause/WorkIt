@@ -79,10 +79,9 @@ public class Map_view_fragment extends Fragment
             // to handle the case where the user grants the permission. See the documentation
             // for ActivityCompat#requestPermissions for more details.
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+            //if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
                 requestPermissions(new String []{Manifest.permission.ACCESS_COARSE_LOCATION,
                 Manifest.permission.ACCESS_FINE_LOCATION}, MY_REQUEST_INT);
-            }
             return;
         }
         else {
@@ -97,8 +96,8 @@ public class Map_view_fragment extends Fragment
 //        MarkerOptions option = new MarkerOptions();
 //        option.position(userLocation).title("User Location");
 //
-//        map.addMarker(option);
-//        map.moveCamera(CameraUpdateFactory.newLatLng(userLocation));
+//        mMap.addMarker(option);
+//        mMap.moveCamera(CameraUpdateFactory.newLatLng(userLocation));
 
     }
 

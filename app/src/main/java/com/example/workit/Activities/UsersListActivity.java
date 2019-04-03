@@ -37,7 +37,7 @@ public class UsersListActivity extends AppCompatActivity {
     }
 
     /**
-     * This method is to initialize views
+     * This method initializes the views
      */
     private void initViews() {
         textViewName = (AppCompatTextView) findViewById(R.id.textViewName);
@@ -45,7 +45,7 @@ public class UsersListActivity extends AppCompatActivity {
     }
 
     /**
-     * This method is to initialize objects to be used
+     * Initialize objects to be used
      */
     private void initObjects() {
         listUsers = new ArrayList<>();
@@ -65,7 +65,7 @@ public class UsersListActivity extends AppCompatActivity {
     }
 
     /**
-     * This method is to fetch all user records from SQLite
+     * This method fetches all user records from SQLite
      */
     private void getDataFromSQLite() {
         // AsyncTask is used that SQLite operation not blocks the UI Thread.
