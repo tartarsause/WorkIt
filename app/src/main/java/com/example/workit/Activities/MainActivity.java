@@ -31,18 +31,30 @@ public class MainActivity extends AppCompatActivity
     private EditText mPasswordField;
 
     private String emailString;
+    private String userNameString;
 
     private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Bundle extras = getIntent().getExtras();
-        if (extras== null)
+        if (extras== null) {
             emailString = null;
-        else
+            userNameString = null;
+        }
+        else {
             emailString = extras.getString("EMAIL");
+            userNameString = extras.getString(userNameString);
+        }
         mAuth = FirebaseAuth.getInstance();
         super.onCreate(savedInstanceState);
+
+        // Views
+        mStatusTextView = findViewById(R.id.status);
+        mDetailTextView = findViewById(R.id.detail);
+        mEmailField = findViewById(R.id.fieldEmail);
+        mPasswordField = findViewById(R.id.fieldPassword);
+
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -137,6 +149,8 @@ public class MainActivity extends AppCompatActivity
 
     private void updateUI(FirebaseUser user) {
         if (user != null) {
+            //TODO: Add Status, Text and other res variables into the layout, else it'll constantly have a null pointer error
+
             mStatusTextView.setText(getString(R.string.emailpassword_status_fmt,
                     user.getEmail(), user.isEmailVerified()));
             mDetailTextView.setText(getString(R.string.firebase_status_fmt, user.getUid()));
@@ -146,7 +160,8 @@ public class MainActivity extends AppCompatActivity
             findViewById(R.id.signedInButtons).setVisibility(View.VISIBLE);
 
             findViewById(R.id.verifyEmailButton).setEnabled(!user.isEmailVerified());
-        } else {
+        }
+        else {
             mStatusTextView.setText(R.string.signed_out);
             mDetailTextView.setText(null);
 

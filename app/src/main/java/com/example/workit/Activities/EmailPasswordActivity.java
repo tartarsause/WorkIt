@@ -40,12 +40,17 @@ public class EmailPasswordActivity extends BaseActivity implements
 
     private TextView mStatusTextView;
     private TextView mDetailTextView;
+    private EditText mNameField;
     private EditText mEmailField;
     private EditText mPasswordField;
 
     // [START declare_auth]
     private FirebaseAuth mAuth;
     // [END declare_auth]
+
+    //Variables
+    private String userName;
+    private String userEmail;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -57,6 +62,7 @@ public class EmailPasswordActivity extends BaseActivity implements
         mDetailTextView = findViewById(R.id.detail);
         mEmailField = findViewById(R.id.fieldEmail);
         mPasswordField = findViewById(R.id.fieldPassword);
+        mNameField = findViewById(R.id.fieldName);
 
         // Buttons
         findViewById(R.id.emailSignInButton).setOnClickListener(this);
@@ -80,7 +86,7 @@ public class EmailPasswordActivity extends BaseActivity implements
     }
     // [END on_start_check_user]
 
-    private void createAccount(String email, String password) {
+    private void createAccount(final String email, String password, final String name) {
         Log.d(TAG, "createAccount:" + email);
         if (!validateForm()) {
             return;
@@ -98,6 +104,9 @@ public class EmailPasswordActivity extends BaseActivity implements
                             Log.d(TAG, "createUserWithEmail:success");
                             FirebaseUser user = mAuth.getCurrentUser();
                             updateUI(user);
+                            Intent mainActivityIntent = new Intent(getApplicationContext(), MainActivity.class);
+                            mainActivityIntent.putExtra("EMAIL", email);
+                            startActivity(mainActivityIntent);
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "createUserWithEmail:failure", task.getException());
@@ -114,7 +123,7 @@ public class EmailPasswordActivity extends BaseActivity implements
         // [END create_user_with_email]
     }
 
-    private void signIn(final String email, String password) {
+    private void signIn(final String email, String password, String name) {
         Log.d(TAG, "signIn:" + email);
         if (!validateForm()) {
             return;
@@ -209,6 +218,13 @@ public class EmailPasswordActivity extends BaseActivity implements
         } else {
             mPasswordField.setError(null);
         }
+        String name = mNameField.getText().toString();
+        if (TextUtils.isEmpty(name)) {
+            mNameField.setError("Required.");
+            valid = false;
+        } else {
+            mNameField.setError(null);
+        }
 
         return valid;
     }
@@ -239,9 +255,11 @@ public class EmailPasswordActivity extends BaseActivity implements
     public void onClick(View v) {
         int i = v.getId();
         if (i == R.id.emailCreateAccountButton) {
-            createAccount(mEmailField.getText().toString(), mPasswordField.getText().toString());
+            createAccount(mEmailField.getText().toString(), mPasswordField.getText().toString(),
+                    mNameField.getText().toString());
         } else if (i == R.id.emailSignInButton) {
-            signIn(mEmailField.getText().toString(), mPasswordField.getText().toString());
+            signIn(mEmailField.getText().toString(), mPasswordField.getText().toString(),
+                    mNameField.getText().toString());
         } else if (i == R.id.signOutButton) {
             signOut();
         } else if (i == R.id.verifyEmailButton) {
