@@ -16,6 +16,7 @@
 
 package com.example.workit.Activities;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -40,7 +41,6 @@ public class EmailPasswordActivity extends BaseActivity implements
 
     private TextView mStatusTextView;
     private TextView mDetailTextView;
-    private EditText mNameField;
     private EditText mEmailField;
     private EditText mPasswordField;
 
@@ -62,7 +62,6 @@ public class EmailPasswordActivity extends BaseActivity implements
         mDetailTextView = findViewById(R.id.detail);
         mEmailField = findViewById(R.id.fieldEmail);
         mPasswordField = findViewById(R.id.fieldPassword);
-        mNameField = findViewById(R.id.fieldName);
 
         // Buttons
         findViewById(R.id.emailSignInButton).setOnClickListener(this);
@@ -86,7 +85,7 @@ public class EmailPasswordActivity extends BaseActivity implements
     }
     // [END on_start_check_user]
 
-    private void createAccount(final String email, String password, final String name) {
+    private void createAccount(final String email, String password) {
         Log.d(TAG, "createAccount:" + email);
         if (!validateForm()) {
             return;
@@ -123,7 +122,7 @@ public class EmailPasswordActivity extends BaseActivity implements
         // [END create_user_with_email]
     }
 
-    private void signIn(final String email, String password, String name) {
+    private void signIn(final String email, String password) {
         Log.d(TAG, "signIn:" + email);
         if (!validateForm()) {
             return;
@@ -140,9 +139,7 @@ public class EmailPasswordActivity extends BaseActivity implements
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithEmail:success");
                             FirebaseUser user = mAuth.getCurrentUser();
-                            updateUI(user);
                             Intent mainActivityIntent = new Intent(getApplicationContext(), MainActivity.class);
-                            mainActivityIntent.putExtra("EMAIL", email);
                             startActivity(mainActivityIntent);
 
                         } else {
@@ -218,14 +215,6 @@ public class EmailPasswordActivity extends BaseActivity implements
         } else {
             mPasswordField.setError(null);
         }
-        String name = mNameField.getText().toString();
-        if (TextUtils.isEmpty(name)) {
-            mNameField.setError("Required.");
-            valid = false;
-        } else {
-            mNameField.setError(null);
-        }
-
         return valid;
     }
 
@@ -255,11 +244,9 @@ public class EmailPasswordActivity extends BaseActivity implements
     public void onClick(View v) {
         int i = v.getId();
         if (i == R.id.emailCreateAccountButton) {
-            createAccount(mEmailField.getText().toString(), mPasswordField.getText().toString(),
-                    mNameField.getText().toString());
+            createAccount(mEmailField.getText().toString(), mPasswordField.getText().toString());
         } else if (i == R.id.emailSignInButton) {
-            signIn(mEmailField.getText().toString(), mPasswordField.getText().toString(),
-                    mNameField.getText().toString());
+            signIn(mEmailField.getText().toString(), mPasswordField.getText().toString());
         } else if (i == R.id.signOutButton) {
             signOut();
         } else if (i == R.id.verifyEmailButton) {
