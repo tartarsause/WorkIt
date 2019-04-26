@@ -90,14 +90,13 @@ public class Map_view_fragment extends Fragment
             mMap.setOnMyLocationClickListener(this);
         }
 
+        //LatLng userLocation = new LatLng();
 
+        LatLng sydney = new LatLng(-33.852, 151.211);
+        googleMap.addMarker(new MarkerOptions().position(sydney)
+                .title("Marker in Sydney"));
 
-//        LatLng userLocation = new LatLng(11, 104);
-//        MarkerOptions option = new MarkerOptions();
-//        option.position(userLocation).title("User Location");
-//
-//        mMap.addMarker(option);
-//        mMap.moveCamera(CameraUpdateFactory.newLatLng(userLocation));
+        googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
 
     }
 

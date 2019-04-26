@@ -29,10 +29,15 @@ import android.widget.Toast;
 
 import com.example.workit.R;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class EmailPasswordActivity extends BaseActivity implements
         View.OnClickListener {
@@ -47,6 +52,9 @@ public class EmailPasswordActivity extends BaseActivity implements
     // [START declare_auth]
     private FirebaseAuth mAuth;
     // [END declare_auth]
+
+    //Initialize FirebaseFirestore
+//    FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     //Variables
     private String userName;
@@ -85,7 +93,7 @@ public class EmailPasswordActivity extends BaseActivity implements
     }
     // [END on_start_check_user]
 
-    private void createAccount(final String email, String password) {
+    private void createAccount(final String email, final String password) {
         Log.d(TAG, "createAccount:" + email);
         if (!validateForm()) {
             return;
@@ -106,6 +114,28 @@ public class EmailPasswordActivity extends BaseActivity implements
                             Intent mainActivityIntent = new Intent(getApplicationContext(), MainActivity.class);
                             mainActivityIntent.putExtra("EMAIL", email);
                             startActivity(mainActivityIntent);
+
+//                            //Add user data to database
+//                            // Create a new user with a first and last name
+//                            Map<String, Object> userData = new HashMap<>();
+//                            userData.put("email", email);
+//                            userData.put("password", password);
+//
+//                            // Add a new document with a generated ID
+//                            db.collection("users")
+//                                    .add(user)
+//                                    .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+//                                        @Override
+//                                        public void onSuccess(DocumentReference documentReference) {
+//                                            Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
+//                                        }
+//                                    })
+//                                    .addOnFailureListener(new OnFailureListener() {
+//                                        @Override
+//                                        public void onFailure(@NonNull Exception e) {
+//                                            Log.w(TAG, "Error adding document", e);
+//                                        }
+//                                    });
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "createUserWithEmail:failure", task.getException());
@@ -221,15 +251,8 @@ public class EmailPasswordActivity extends BaseActivity implements
     private void updateUI(FirebaseUser user) {
         hideProgressDialog();
         if (user != null) {
-            mStatusTextView.setText(getString(R.string.emailpassword_status_fmt,
-                    user.getEmail(), user.isEmailVerified()));
-            mDetailTextView.setText(getString(R.string.firebase_status_fmt, user.getUid()));
-
-            findViewById(R.id.emailPasswordButtons).setVisibility(View.GONE);
-            findViewById(R.id.emailPasswordFields).setVisibility(View.GONE);
-            findViewById(R.id.signedInButtons).setVisibility(View.VISIBLE);
-
-            findViewById(R.id.verifyEmailButton).setEnabled(!user.isEmailVerified());
+            Intent mainActivityIntent = new Intent(getApplicationContext(), MainActivity.class);
+            startActivity(mainActivityIntent);
         } else {
             mStatusTextView.setText(R.string.signed_out);
             mDetailTextView.setText(null);

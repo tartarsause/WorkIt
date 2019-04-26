@@ -76,4 +76,7 @@
     <string name="verify_email">Verify Email</string>
     <string name="loading">Loading…</string>
 
+    <!-- Main view strings -->
+    <string name="auto_fill_cities">Singapore, Kuala Lumpur, Jakarta, Rome, Manila</string>
+
 </resources>
