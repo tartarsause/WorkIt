@@ -111,10 +111,6 @@ public class EmailPasswordActivity extends BaseActivity implements
                             Log.d(TAG, "createUserWithEmail:success");
                             FirebaseUser user = mAuth.getCurrentUser();
                             updateUI(user);
-                            Intent mainActivityIntent = new Intent(getApplicationContext(), MainActivity.class);
-                            mainActivityIntent.putExtra("EMAIL", email);
-                            startActivity(mainActivityIntent);
-
 //                            //Add user data to database
 //                            // Create a new user with a first and last name
 //                            Map<String, Object> userData = new HashMap<>();
@@ -169,8 +165,7 @@ public class EmailPasswordActivity extends BaseActivity implements
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithEmail:success");
                             FirebaseUser user = mAuth.getCurrentUser();
-                            Intent mainActivityIntent = new Intent(getApplicationContext(), MainActivity.class);
-                            startActivity(mainActivityIntent);
+                            updateUI(user);
 
                         } else {
                             // If sign in fails, display a message to the user.
@@ -251,6 +246,10 @@ public class EmailPasswordActivity extends BaseActivity implements
     private void updateUI(FirebaseUser user) {
         hideProgressDialog();
         if (user != null) {
+            String name = "Bob Tester";
+            Intent intent = new Intent(EmailPasswordActivity.this, MainActivity.class);
+            intent.putExtra("Name", name);
+            startActivity(intent);
             Intent mainActivityIntent = new Intent(getApplicationContext(), MainActivity.class);
             startActivity(mainActivityIntent);
         } else {

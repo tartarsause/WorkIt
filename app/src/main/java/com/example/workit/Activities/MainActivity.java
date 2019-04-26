@@ -17,6 +17,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.workit.R;
 import com.google.firebase.auth.FirebaseAuth;
@@ -27,6 +28,8 @@ public class MainActivity extends AppCompatActivity
 
     private TextView mStatusTextView;
     private TextView mDetailTextView;
+    TextView mNameTextView;
+    TextView mEmailTextView;
     private EditText mEmailField;
     private EditText mPasswordField;
 
@@ -39,17 +42,23 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Bundle extras = getIntent().getExtras();
-        if (extras== null) {
-            emailString = null;
-            userNameString = null;
+        super.onCreate(savedInstanceState);
+        mAuth = FirebaseAuth.getInstance();
+
+        setContentView(R.layout.activity_main);
+
+        Bundle bundle = getIntent().getExtras();
+
+        if (bundle != null) {
+            Toast.makeText(getApplicationContext(), "Login Extras are:" + bundle , Toast.LENGTH_LONG).show();
+            userNameString = bundle.getString("Name");
+            emailString = bundle.getString("EMAIL");
         }
         else {
-            emailString = extras.getString("EMAIL");
-            userNameString = extras.getString(userNameString);
+            Toast.makeText(getApplicationContext(), "Login Extras are empty", Toast.LENGTH_LONG).show();
+            userNameString = "Bob Tester";
+            emailString = "test@test.com";
         }
-        mAuth = FirebaseAuth.getInstance();
-        super.onCreate(savedInstanceState);
 
         // Views
         mStatusTextView = findViewById(R.id.status);
@@ -57,8 +66,14 @@ public class MainActivity extends AppCompatActivity
         mEmailField = findViewById(R.id.fieldEmail);
         mPasswordField = findViewById(R.id.fieldPassword);
 
-        setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
+        mNameTextView = findViewById(R.id.userNameTextView);
+        mEmailTextView =  findViewById(R.id.userEmailTextView);
+        userNameString = "Bob Tester";
+        emailString = "test@test.com";
+//        mNameTextView.setText("Bob Tester");
+//        mEmailTextView.setText("test@test.com");
+
         setSupportActionBar(toolbar);
 
 //        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
