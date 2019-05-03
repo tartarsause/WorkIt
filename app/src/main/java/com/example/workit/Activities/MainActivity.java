@@ -28,14 +28,14 @@ public class MainActivity extends AppCompatActivity
 
     private TextView mStatusTextView;
     private TextView mDetailTextView;
-    TextView mNameTextView;
-    TextView mEmailTextView;
+    private TextView mNameTextView;
+    private TextView mEmailTextView;
     private EditText mEmailField;
     private EditText mPasswordField;
 
     private String emailString;
     private String userNameString;
-
+    private String locationInput;
     private FirebaseAuth mAuth;
 
     private boolean viewIsAtHome;

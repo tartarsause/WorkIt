@@ -23,20 +23,33 @@
             android:layout_gravity="center_horizontal"
             android:textSize="24dp" />
 
-        <android.support.design.widget.TextInputLayout
+
+            <!--<AutoCompleteTextView-->
+                <!--android:id="@+id/locationInput"-->
+                <!--android:layout_width="292dp"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_gravity="center_horizontal"-->
+                <!--android:background="@color/grey_300"-->
+                <!--android:hint="Try Singapore"-->
+                <!--android:textColorHint="@drawable/selector"-->
+                <!--android:textSize="20dp"-->
+                <!--android:textColor="@color/colorTextBlack"/>-->
+
+        <SearchView
+            android:id="@+id/locationInput"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content"
+            android:iconifiedByDefault="false"
+            android:queryHint="Try Singapore"
+            android:textColorHint="@drawable/selector"
+            android:background="@color/grey_300"
+            android:focusable="true"/>
 
-            <android.support.design.widget.TextInputEditText
-                android:id="@+id/searchText"
-                android:layout_width="292dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:background="@color/grey_300"
-                android:hint="Try Singapore"
-                android:textColorHint="@drawable/selector"
-                android:textSize="20dp" />
+    <ListView
+        android:id="@+id/locInputListView"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_below="@+id/search" />
 
-        </android.support.design.widget.TextInputLayout>
-    </LinearLayout>
+</LinearLayout>
 </android.support.constraint.ConstraintLayout>
