@@ -24,7 +24,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener,
+        HomeViewFragment.DataPassListener
+                    {
 
     private TextView mStatusTextView;
     private TextView mDetailTextView;
@@ -94,6 +96,17 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         displayView(R.id.nav_home); //initial startup view
+    }
+
+    @Override
+    public void passData(String data) {
+        Map_view_fragment map_view_fragment = new Map_view_fragment();
+        Bundle args = new Bundle();
+        args.putString(Map_view_fragment.DATA_RECEIVE, data);
+        map_view_fragment.setArguments(args);
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.content_main_frame, map_view_fragment)
+                .commit();
     }
 
     @Override

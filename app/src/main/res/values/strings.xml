@@ -78,5 +78,5 @@
 
     <!-- Main view strings -->
     <string name="auto_fill_cities">Singapore, Kuala Lumpur, Jakarta, Rome, Manila</string>
-
+    <string name="search_hint">Search cities</string>
 </resources>

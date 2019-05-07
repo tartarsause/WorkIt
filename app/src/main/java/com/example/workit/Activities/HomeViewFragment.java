@@ -1,5 +1,8 @@
 package com.example.workit.Activities;
 
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -22,9 +25,15 @@ public class HomeViewFragment extends Fragment {
     public EditText mSearchField;
     ListView listView;
     //ListViewAdapter adapter;
-    SearchView editsearch;
+    SearchView editSearch;
     String[] cityNameList;
     ArrayList<String> list;
+    DataPassListener mCallback;
+    String cityName;
+
+    public interface DataPassListener{
+        public void passData(String data);
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -47,8 +56,8 @@ public class HomeViewFragment extends Fragment {
 //        ArrayList<CityNames> arraylist = new ArrayList<CityNames>();
 
         // Locate the Views
-        editsearch = getActivity().findViewById(R.id.locationInput);
-        listView = getActivity().findViewById(R.id.locInputListView);
+        editSearch = view.findViewById(R.id.locationInput);
+        listView = view.findViewById(R.id.locInputListView);
 
         // Generate sample data
 //        list = new ArrayList<>();
@@ -61,6 +70,41 @@ public class HomeViewFragment extends Fragment {
                 "Cat", "Tortoise", "Rat", "Elephant", "Fox",
                 "Cow","Donkey","Monkey"};
 
+        editSearch.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                cityName = editSearch.getQuery().toString().trim();
+                mCallback.passData(cityName);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        //ensures the host activity has implemented the callback interface
+        super.onAttach(context);
+        try {
+            mCallback = (DataPassListener) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString() + "must implement OnSearchInputEnteredListener");
+        }
+    }
+
+    //        String cityName = editSearch.toString();
+//        Intent intent = new Intent(getContext(), Map_view_fragment.class);
+//        intent.putExtra("cityInput", cityName);
+//
+//        if (intent != null) {
+//            startActivity(intent);
+//            Intent Map_view_fragment_Intent = new Intent(getContext(), Map_view_fragment.class);
+//            startActivity(Map_view_fragment_Intent);
+//        }
 
 //        for (int i = 0; i < cityNameList.length; i++) {
 //            CityNames cityNames = new CityNames(cityNameList[i]);
@@ -136,7 +180,5 @@ public class HomeViewFragment extends Fragment {
 //
 //    private static final String[] CITIES = new String[] {
 //            "Belgium", "France", "Italy", "Germany", "Spain", "Singapore", "Kuala Lumpur", "Penang"
-    };
-    //TODO: 27/4/19 0147HRS Link locationInput with coordinates in map activity, will have to add button to initiate search as well.
 
 }
