@@ -32,8 +32,10 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -56,7 +58,20 @@ import static android.provider.SettingsSlicesContract.KEY_LOCATION;
 public class Map_view_fragment extends Fragment
         implements OnMapReadyCallback,
         GoogleMap.OnMyLocationButtonClickListener,
-        GoogleMap.OnMyLocationClickListener {
+        GoogleMap.OnMyLocationClickListener,
+        GoogleMap.OnMarkerClickListener{
+
+    //Hardcoded office locations
+    private static final LatLng WeWork_City_House = new LatLng(1.281293, 103.850049); //Address: 36 Robinson Rd, Singapore 068877
+    private static final LatLng JustCo = new LatLng(1.281797, 103.851504); //Address: 6 Raffles Quay, #16-01, Singapore 048580
+    private static final LatLng Coworkyard_Office = new LatLng(1.283436, 103.852680); //Address: 11 Collyer Quay, Singapore 049319
+
+
+    private Marker mWeWork;
+    private Marker mJustCo;
+    private Marker mCoworkyard;
+
+
 
     private static final int MY_REQUEST_INT = 177;
 
@@ -157,6 +172,51 @@ public class Map_view_fragment extends Fragment
         googleMap.addMarker(new MarkerOptions().position(singapore)
                 .title("Singapore"));
         //googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(singapore, 15));
+
+        // Add some markers to the map, and add a data object to each marker.
+        mWeWork = mMap.addMarker(new MarkerOptions()
+                .position(WeWork_City_House)
+                .title("WeWork City House")
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+        mWeWork.setTag(0);
+
+        mCoworkyard = mMap.addMarker(new MarkerOptions()
+                .position(Coworkyard_Office)
+                .title("Coworkyard Office")
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+        mCoworkyard.setTag(0);
+
+        mJustCo = mMap.addMarker(new MarkerOptions()
+                .position(JustCo)
+                .title("JustCo")
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+        mJustCo.setTag(0);
+
+        //TODO: Create custom marker for offices to display price,
+        // refer to https://stackoverflow.com/questions/50246711/google-map-with-number-markers-from-server
+
+        mMap.setOnMarkerClickListener(this);
+    }
+
+    /** Called when the user clicks a marker. */
+    @Override
+    public boolean onMarkerClick(final Marker marker) {
+
+        // Retrieve the data from the marker.
+        Integer clickCount = (Integer) marker.getTag();
+
+        // Check if a click count was set, then display the click count.
+        if (clickCount != null) {
+            clickCount = clickCount + 1;
+            marker.setTag(clickCount);
+            Toast.makeText(getContext(), marker.getTitle() + " has been clicked " + clickCount + " times.",
+                    Toast.LENGTH_SHORT).show();
+        }
+
+        // Return false to indicate that we have not consumed the event and that we wish
+        // for the default behavior to occur (which is for the camera to move such that the
+        // marker is centered and for the marker's info window to open, if it has one).
+        return false;
     }
 
 
