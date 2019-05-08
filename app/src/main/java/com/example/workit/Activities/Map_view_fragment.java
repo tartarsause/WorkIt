@@ -26,13 +26,20 @@ import android.widget.Toast;
 
 import com.example.workit.R;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -40,6 +47,7 @@ import java.util.List;
 
 import static android.content.ContentValues.TAG;
 import static android.os.Parcelable.PARCELABLE_WRITE_RETURN_VALUE;
+import static android.provider.SettingsSlicesContract.KEY_LOCATION;
 
 
 /**
@@ -54,8 +62,23 @@ public class Map_view_fragment extends Fragment
 
     GoogleMap mMap;
     TextView receivedCityText;
-
     final static String DATA_RECEIVE = "data_receive";
+
+
+    private FusedLocationProviderClient mFusedLocationProviderClient;
+    private Location mLastKnownLocation;
+    private CameraPosition mCameraPosition;
+    private boolean mLocationPermissionGranted = true;
+
+    // A default location, Singapore and default zoom to use when location permission is
+    // not granted.
+    private final LatLng mDefaultLocation = new LatLng(1.290270, 103.851959);
+    private static final int DEFAULT_ZOOM = 15;
+    private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
+
+    // Keys for storing activity state.
+    private static final String KEY_CAMERA_POSITION = "camera_position";
+    private static final String KEY_LOCATION = "location";
 
     public Map_view_fragment() {
         // Required empty public constructor
@@ -68,6 +91,7 @@ public class Map_view_fragment extends Fragment
         View v = inflater.inflate(R.layout.fragment_map_view_fragment, container, false);
 
         return v;
+
     }
 
     @Override
@@ -90,15 +114,19 @@ public class Map_view_fragment extends Fragment
 
         receivedCityText = view.findViewById(R.id.CityTextView);
 
+        // Construct a FusedLocationProviderClient.
+        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getContext());
 
-        //Get the intent, verify action and retrieve query
-        Intent intent = getActivity().getIntent();
-        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-            String query = intent.getStringExtra(SearchManager.QUERY);
-            geoLocate(query);
+        if (savedInstanceState != null) {
+            mLastKnownLocation = savedInstanceState.getParcelable(KEY_LOCATION);
+            mCameraPosition = savedInstanceState.getParcelable(KEY_CAMERA_POSITION);
         }
 
+        // Set title bar
+        ((MainActivity) getActivity()).setActionBarTitle("Map");
+
     }
+
     protected void displayReceivedData(String message) {
         receivedCityText.setText(message);
     }
@@ -107,31 +135,74 @@ public class Map_view_fragment extends Fragment
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        //Check permission for location
-        if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(),
-                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String []{Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.ACCESS_FINE_LOCATION}, MY_REQUEST_INT);
-            return;
-        }
-        else {
-            mMap.setMyLocationEnabled(true);
-            mMap.setOnMyLocationButtonClickListener(this);
-            mMap.setOnMyLocationClickListener(this);
-        }
 
-        //LatLng userLocation = new LatLng();
+        //If bundle is present, geolocate query
+        if (receivedCityText != null) {
+            // Turn on the My Location layer and the related control on the map.
+            updateLocationUI();
 
+            // Get the current location of the device and set the position of the map.
+            getDeviceLocation();
+
+            //execute method to find city and move camera
+            geoLocate();
+        } else {
+            // Turn on the My Location layer and the related control on the map.
+            updateLocationUI();
+
+            // Get the current location of the device and set the position of the map.
+            getDeviceLocation();
+        }
         LatLng singapore = new LatLng(1.290270, 103.851959);
         googleMap.addMarker(new MarkerOptions().position(singapore)
                 .title("Singapore"));
-
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(singapore, 10));
-
+        //googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(singapore, 15));
     }
 
 
+    private void getLocationPermission() {
+        /*
+         * Request location permission, so that we can get the location of the
+         * device. The result of the permission request is handled by a callback,
+         * onRequestPermissionsResult.
+         */
+        if (ContextCompat.checkSelfPermission(getContext(),
+                android.Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            mLocationPermissionGranted = true;
+        } else {
+            ActivityCompat.requestPermissions(getActivity(),
+                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String permissions[],
+                                           @NonNull int[] grantResults) {
+        mLocationPermissionGranted = false;
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    mLocationPermissionGranted = true;
+                }
+            }
+        }
+        updateLocationUI();
+    }
+
+    //Saves state of map when activity is paused
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        if (mMap != null) {
+            outState.putParcelable(KEY_CAMERA_POSITION, mMap.getCameraPosition());
+            outState.putParcelable(KEY_LOCATION, mLastKnownLocation);
+            super.onSaveInstanceState(outState);
+        }
+    }
 
     @Override
     public void onMyLocationClick(@NonNull Location location) {
@@ -144,15 +215,66 @@ public class Map_view_fragment extends Fragment
         return false;
     }
 
-    private void geoLocate(String query) {
+    private void updateLocationUI() {
+        if (mMap == null) {
+            return;
+        }
+        try {
+            if (mLocationPermissionGranted) {
+                mMap.setMyLocationEnabled(true);
+            } else {
+                mMap.setMyLocationEnabled(false);
+                mMap.getUiSettings().setMyLocationButtonEnabled(false);
+                mLastKnownLocation = null;
+                mMap.getUiSettings().setMyLocationButtonEnabled(true);
+                getLocationPermission();
+            }
+        } catch (SecurityException e) {
+            Log.e("Exception: %s", e.getMessage());
+        }
+    }
+
+    private void getDeviceLocation() {
+        //Gets the current location of the device, and positions the map's camera.
+        try {
+            if (mLocationPermissionGranted) {
+                Task<Location> locationResult = mFusedLocationProviderClient.getLastLocation();
+                locationResult.addOnCompleteListener(getActivity(), new OnCompleteListener<Location>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Location> task) {
+                        if (task.isSuccessful()) {
+                            // Set the map's camera position to the current location of the device.
+                            mLastKnownLocation = task.getResult();
+                            if (receivedCityText == null) {
+                                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                                        new LatLng(mLastKnownLocation.getLatitude(),
+                                                mLastKnownLocation.getLongitude()), DEFAULT_ZOOM));
+                            }
+                        } else {
+                            Log.d(TAG, "Current location is null. Using defaults.");
+                            Log.e(TAG, "Exception: %s", task.getException());
+                            mMap.moveCamera(CameraUpdateFactory
+                                    .newLatLngZoom(mDefaultLocation, DEFAULT_ZOOM));
+                            mMap.getUiSettings().setMyLocationButtonEnabled(false);
+                        }
+                    }
+                });
+            }
+        } catch (SecurityException e) {
+            Log.e("Exception: %s", e.getMessage());
+        }
+    }
+
+    private void geoLocate() {
+        String query = receivedCityText.getText().toString();
+        Log.d(TAG, "geoLocate: Query is " + query);
         Log.d(TAG, "geoLocate: geolocating");
 
-        String searchString = query;
 
         Geocoder geocoder = new Geocoder(getContext());
         List<Address> list = new ArrayList<>();
         try{
-            list = geocoder.getFromLocationName(searchString, 1);
+            list = geocoder.getFromLocationName(query, 1);
         } catch (IOException e)
         {
             Log.e(TAG, "geoLocate: IOException" + e.getMessage());
@@ -161,9 +283,7 @@ public class Map_view_fragment extends Fragment
         if (list.size() > 0) {
             Address address = list.get(0);
             Log.d(TAG, "geoLocate: found a location: " + address.toString());
-            //Toast.makeText(getContext(), address.toString(), Toast.LENGTH_SHORT).show();
-
-            moveCamera(new LatLng(address.getLatitude(), address.getLongitude()), 50);
+            moveCamera(new LatLng(address.getLatitude(), address.getLongitude()), 10);
         }
     }
 
