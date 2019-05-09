@@ -6,19 +6,24 @@
         android:orderInCategory="100"
         android:title="@string/action_settings"
         app:showAsAction="never"/>
+    <item
+        android:id="@+id/ble_button"
+        app:showAsAction="always"
+        android:icon="@drawable/ble_icon"
+        android:title="Bluetooth" />
 
-    <item android:id="@+id/menu_refresh"
-        android:checkable="false"
-        android:orderInCategory="1"
-        android:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/ble_button_startConnection"
+        app:showAsAction="always"
+        android:icon="@drawable/ble_connect_icon"
+        android:title="Start Bluetooth Connect"
+        />
 
-    <item android:id="@+id/menu_scan"
-        android:title="@string/menu_scan"
-        android:orderInCategory="100"
-        android:showAsAction="ifRoom|withText"/>
+    <item
+        android:id="@+id/btnDiscoverable_on_off"
+        app:showAsAction="always"
+        android:icon="@drawable/ble_searching_icon"
+        android:title="Bluetooth Discoverability"
+        />
 
-    <item android:id="@+id/menu_stop"
-        android:title="@string/menu_stop"
-        android:orderInCategory="101"
-        android:showAsAction="ifRoom|withText"/>
 </menu>

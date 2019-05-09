@@ -239,15 +239,15 @@ public class PaymentsUtil {
 
       /* An optional shipping address requirement is a top-level property of the PaymentDataRequest
       JSON object. */
-            paymentDataRequest.put("shippingAddressRequired", true);
+            //paymentDataRequest.put("shippingAddressRequired", true);
 
-            JSONObject shippingAddressParameters = new JSONObject();
-            shippingAddressParameters.put("phoneNumberRequired", false);
+            //JSONObject shippingAddressParameters = new JSONObject();
+            //shippingAddressParameters.put("phoneNumberRequired", false);
 
-            JSONArray allowedCountryCodes = new JSONArray(Constants.SHIPPING_SUPPORTED_COUNTRIES);
+            //JSONArray allowedCountryCodes = new JSONArray(Constants.SHIPPING_SUPPORTED_COUNTRIES);
 
-            shippingAddressParameters.put("allowedCountryCodes", allowedCountryCodes);
-            paymentDataRequest.put("shippingAddressParameters", shippingAddressParameters);
+            //shippingAddressParameters.put("allowedCountryCodes", allowedCountryCodes);
+            //paymentDataRequest.put("shippingAddressParameters", shippingAddressParameters);
             return Optional.of(paymentDataRequest);
         } catch (JSONException e) {
             return Optional.empty();

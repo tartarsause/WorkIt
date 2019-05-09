@@ -3,6 +3,7 @@ package com.example.workit.Activities;
 
 import android.Manifest;
 import android.app.SearchManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
@@ -52,20 +53,23 @@ import static android.os.Parcelable.PARCELABLE_WRITE_RETURN_VALUE;
 import static android.provider.SettingsSlicesContract.KEY_LOCATION;
 
 
-/**
- * A simple {@link Fragment} subclass.
- */
+
 public class Map_view_fragment extends Fragment
         implements OnMapReadyCallback,
         GoogleMap.OnMyLocationButtonClickListener,
         GoogleMap.OnMyLocationClickListener,
-        GoogleMap.OnMarkerClickListener{
+        GoogleMap.OnMarkerClickListener,
+        GoogleMap.OnInfoWindowClickListener {
 
     //Hardcoded office locations
     private static final LatLng WeWork_City_House = new LatLng(1.281293, 103.850049); //Address: 36 Robinson Rd, Singapore 068877
     private static final LatLng JustCo = new LatLng(1.281797, 103.851504); //Address: 6 Raffles Quay, #16-01, Singapore 048580
     private static final LatLng Coworkyard_Office = new LatLng(1.283436, 103.852680); //Address: 11 Collyer Quay, Singapore 049319
 
+    //Hardcoded office prices
+    private int price1 = 30;
+    private int price2 = 30;
+    private int price3 = 25;
 
     private Marker mWeWork;
     private Marker mJustCo;
@@ -104,9 +108,7 @@ public class Map_view_fragment extends Fragment
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_map_view_fragment, container, false);
-
         return v;
-
     }
 
     @Override
@@ -177,25 +179,32 @@ public class Map_view_fragment extends Fragment
         mWeWork = mMap.addMarker(new MarkerOptions()
                 .position(WeWork_City_House)
                 .title("WeWork City House")
+                .snippet("$" +price1 + "/day")
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
         mWeWork.setTag(0);
+        mWeWork.showInfoWindow();
 
         mCoworkyard = mMap.addMarker(new MarkerOptions()
                 .position(Coworkyard_Office)
                 .title("Coworkyard Office")
+                .snippet("$" +price2 + "/day")
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
         mCoworkyard.setTag(0);
+        mCoworkyard.showInfoWindow();
 
         mJustCo = mMap.addMarker(new MarkerOptions()
                 .position(JustCo)
                 .title("JustCo")
+                .snippet("$" +price3 + "/day")
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
         mJustCo.setTag(0);
+        mJustCo.showInfoWindow();
 
         //TODO: Create custom marker for offices to display price,
         // refer to https://stackoverflow.com/questions/50246711/google-map-with-number-markers-from-server
 
         mMap.setOnMarkerClickListener(this);
+        mMap.setOnInfoWindowClickListener(this);
     }
 
     /** Called when the user clicks a marker. */
@@ -209,8 +218,8 @@ public class Map_view_fragment extends Fragment
         if (clickCount != null) {
             clickCount = clickCount + 1;
             marker.setTag(clickCount);
-            Toast.makeText(getContext(), marker.getTitle() + " has been clicked " + clickCount + " times.",
-                    Toast.LENGTH_SHORT).show();
+            //Toast.makeText(getContext(), marker.getTitle() + " has been clicked " + clickCount + " times.",
+                    //Toast.LENGTH_SHORT).show();
         }
 
         // Return false to indicate that we have not consumed the event and that we wish
@@ -219,6 +228,18 @@ public class Map_view_fragment extends Fragment
         return false;
     }
 
+
+//    attachment method to implement the interface of sending office data
+//    @Override
+//    public void onAttach(Context context) {
+//        super.onAttach(context);
+//        try{
+//            mOfficeDataCallBack = (OnInfoWindowClickedListener) getActivity();
+//        } catch (ClassCastException e) {
+//            throw new ClassCastException(getActivity().toString() +
+//                    "onInfoWindowClickedListener has not been implemented correctly");
+//        }
+//    }
 
     private void getLocationPermission() {
         /*
@@ -350,5 +371,17 @@ public class Map_view_fragment extends Fragment
     private void moveCamera(LatLng latLng, float zoom) {
         Log.d(TAG, "moveCamera: moving the camera");
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
+    }
+
+    @Override
+    public void onInfoWindowClick(Marker marker) {
+        if (marker.getSnippet() != null ) {
+            Intent intent = new Intent(getActivity(), CheckoutActivity.class);
+            String officeName = marker.getTitle();
+            Integer officePrice = 25;
+            intent.putExtra("officeName", officeName);
+            intent.putExtra("officePrice", price2);
+            startActivity(intent);
+        }
     }
 }

@@ -22,11 +22,11 @@ package com.example.workit.Entities;
  * This POJO class is used only for example purposes - you don't need need it in your code.
  */
 public class ItemInfo {
-    private final String name;
-    private final int imageResourceId;
+    public String name;
+    public int imageResourceId;
 
     // Micros are used for prices to avoid rounding errors when converting between currencies.
-    private final long priceMicros;
+    public long priceMicros;
 
     public ItemInfo(String name, long price, int imageResourceId) {
         this.name = name;

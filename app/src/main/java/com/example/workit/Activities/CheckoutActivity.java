@@ -41,11 +41,21 @@ import com.google.android.gms.wallet.IsReadyToPayRequest;
 import com.google.android.gms.wallet.PaymentData;
 import com.google.android.gms.wallet.PaymentDataRequest;
 import com.google.android.gms.wallet.PaymentsClient;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
+
+import static android.content.ContentValues.TAG;
+
 
 /**
  * Checkout implementation for the app
@@ -57,6 +67,7 @@ public class CheckoutActivity extends Activity {
    * @see <a
    *     href="https://developers.google.com/android/reference/com/google/android/gms/wallet/PaymentsClient">PaymentsClient</a>
    */
+
   private PaymentsClient mPaymentsClient;
 
   /**
@@ -76,8 +87,16 @@ public class CheckoutActivity extends Activity {
 
   private TextView mGooglePayStatusText;
 
-  private ItemInfo mBikeItem = new ItemInfo("Simple Bike", 300 * 1000000, R.drawable.bike);
-  private long mShippingCost = 90 * 1000000;
+  public ItemInfo mOfficeItem = new ItemInfo("WeWork City House", 30 * 1000000, R.drawable.office_space);
+
+  private String officeName;
+
+  private int officePrice;
+
+  private long mShippingCost = 0 * 1000000;
+
+  // Access a Cloud Firestore instance
+  FirebaseFirestore db = FirebaseFirestore.getInstance();
   /**
    * Initialize the Google Pay API on creation of the activity
    *
@@ -89,8 +108,17 @@ public class CheckoutActivity extends Activity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_checkout);
 
-    // Set up the mock information for our item in the UI.
+    // Set up the information for the office in the UI.
     initItemUI();
+
+    CollectionReference offices = db.collection("OfficeProviders");
+
+    //Create test data
+    Map<String, Object> data1 = new HashMap<>();
+    data1.put("Name", "WeWork");
+    data1.put("Country", "Singapore");
+    data1.put("PriceDaily", 30);
+    offices.document("WeWork1").set(data1);
 
     mGooglePayButton = findViewById(R.id.googlepay_button);
     mGooglePayStatusText = findViewById(R.id.googlepay_status);
@@ -107,6 +135,28 @@ public class CheckoutActivity extends Activity {
             requestPayment(view);
           }
         });
+
+    Bundle bundle = getIntent().getExtras();
+
+    if (bundle != null) {
+      Toast.makeText(getApplicationContext(), "Payment Extras are:" + bundle.getString("officeName")
+              + " and " + bundle.getInt("officePrice"), Toast.LENGTH_LONG).show();
+
+      officeName = bundle.getString("officeName");
+      officePrice = bundle.getInt("officePrice");
+
+      mOfficeItem.name = bundle.getString("officeName");
+      mOfficeItem.priceMicros = bundle.getInt("officePrice") * 1000000;
+      mOfficeItem.imageResourceId = (R.drawable.office_space);
+
+      mOfficeItem = new ItemInfo(officeName, officePrice, R.drawable.office_space);
+    }
+    else {
+      Toast.makeText(getApplicationContext(), "Payment Extras are empty", Toast.LENGTH_LONG).show();
+      mOfficeItem = new ItemInfo("Office Name not fetched", 300 * 1000000, R.drawable.office_space);
+    }
+
+
   }
 
   /**
@@ -227,12 +277,31 @@ public class CheckoutActivity extends Activity {
               .getJSONObject("tokenizationData")
               .getString("token")
               .equals("examplePaymentMethodToken")) {
+
+        DocumentReference docRef = db.collection("OfficeProviders").document("WeWork1");
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+          @Override
+          public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+            if (task.isSuccessful()) {
+              DocumentSnapshot document = task.getResult();
+              if (document.exists()) {
+                Log.d(TAG, "DocumentSnapshot data: " + document.getData());
+                Toast.makeText(CheckoutActivity.this, "WeWork data found", Toast.LENGTH_SHORT).show();
+              } else {
+                Log.d(TAG, "No such document");
+              }
+            } else {
+              Log.d(TAG, "get failed with ", task.getException());
+            }
+          }
+        });
+
         AlertDialog alertDialog =
             new AlertDialog.Builder(this)
                 .setTitle("Warning")
                 .setMessage(
-                    "Gateway name set to \"example\" - please modify "
-                        + "Constants.java and replace it with your own gateway.")
+                        //Gateway name set to "example" - please modify Constants.java and replace it with your own gateway
+                    "Payment was successful! Thank you for your purchase.")
                 .setPositiveButton("OK", null)
                 .create();
         alertDialog.show();
@@ -250,6 +319,8 @@ public class CheckoutActivity extends Activity {
       Log.e("handlePaymentSuccess", "Error: " + e.toString());
       return;
     }
+
+
   }
 
   /**
@@ -274,7 +345,7 @@ public class CheckoutActivity extends Activity {
 
     // The price provided to the API should include taxes and shipping.
     // This price is not displayed to the user.
-    String price = PaymentsUtil.microsToString(mBikeItem.getPriceMicros() + mShippingCost);
+    String price = PaymentsUtil.microsToString(mOfficeItem.getPriceMicros() + mShippingCost);
 
     // TransactionInfo transaction = PaymentsUtil.createTransaction(price);
     Optional<JSONObject> paymentDataRequestJson = PaymentsUtil.getPaymentDataRequest(price);
@@ -298,8 +369,8 @@ public class CheckoutActivity extends Activity {
     ImageView itemImage = findViewById(R.id.image_item_image);
     TextView itemPrice = findViewById(R.id.text_item_price);
 
-    itemName.setText(mBikeItem.getName());
-    itemImage.setImageResource(mBikeItem.getImageResourceId());
-    itemPrice.setText(PaymentsUtil.microsToString(mBikeItem.getPriceMicros()));
+    itemName.setText(mOfficeItem.getName());
+    itemImage.setImageResource(mOfficeItem.getImageResourceId());
+    itemPrice.setText("$"+ PaymentsUtil.microsToString(mOfficeItem.getPriceMicros()));
   }
 }

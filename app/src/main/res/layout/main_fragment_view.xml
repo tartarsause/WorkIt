@@ -45,11 +45,11 @@
             android:background="@color/grey_300"
             android:focusable="true"/>
 
-    <ListView
-        android:id="@+id/locInputListView"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_below="@+id/search" />
+        <ListView
+            android:id="@+id/locInputListView"
+            android:layout_width="fill_parent"
+            android:layout_height="399dp"
+            android:layout_below="@+id/search" />
 
 </LinearLayout>
 </android.support.constraint.ConstraintLayout>
